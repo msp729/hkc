@@ -25,8 +25,10 @@ source-repository head
 
 library
   exposed-modules:
+      Calc.Command
       Calc.Common
       Calc.Expr
+      Calc.Parse.Command
       Calc.Parse.Common
       Calc.Parse.Expr
   other-modules:

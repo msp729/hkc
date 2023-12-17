@@ -1,5 +1,6 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE Safe #-}
 
 module Calc.Parse.Common (opts, accept, unary, binary, ternary) where
 

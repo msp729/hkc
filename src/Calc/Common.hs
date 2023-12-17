@@ -1,6 +1,9 @@
-module Calc.Common (Ctx (..)) where
+module Calc.Common (Ctx (..), ci) where
 
 import Calc.Expr
+
+ci :: Ctx
+ci = Ctx 0 0 0 0 (Literal 0) (Literal 0) (Literal 0)
 
 data Ctx = Ctx
     { a :: Double -- ^ var 1
