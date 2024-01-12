@@ -9,14 +9,16 @@ import Data.Text (Text, pack)
 import Data.Void
 import Text.Megaparsec
 import Text.Megaparsec.Char (space, letterChar)
-import Text.Megaparsec.Char.Lexer (decimal, lexeme, symbol)
+import Text.Megaparsec.Char.Lexer (float, decimal, lexeme, symbol)
+import Calc.N
 
 expr :: Parsec Void Text Expr
 expr =
     label "An expression" $
         lexeme space $
             opts
-                [ Literal <$> decimal
+                [ Literal . D <$> float
+                , Literal . I <$> decimal
                 , unary "f" F expr
                 , binary "g" G expr expr
                 , ternary "h" H expr expr expr
@@ -149,7 +151,7 @@ hval (Variable "y") _ y _ = y
 hval (Variable "z") _ _ z = z
 hval x _ _ _ = x
 
-eval :: Ctx -> Expr -> Maybe Double
+eval :: Ctx -> Expr -> Maybe N
 eval _ (Literal d) = Just d
 eval ctx (F x) = eval ctx $ fval (f ctx) x
 eval ctx (G x y) = eval ctx $ gval (g ctx) x y

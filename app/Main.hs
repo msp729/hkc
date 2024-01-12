@@ -10,6 +10,7 @@ import System.IO (isEOF)
 import Text.Megaparsec (errorBundlePretty, runParser)
 import Prelude hiding (getLine)
 import Data.Text (pack)
+import Calc.N
 
 main :: IO ()
 main = do
@@ -39,12 +40,12 @@ bad ctx = do
     outputStrLn "Something went wrong."
     loop ctx
 
-good :: Ctx -> Double -> InputT IO ()
+good :: Ctx -> N -> InputT IO ()
 good ctx val = do
     outputStrLn $ show val
     loop $ ctx{ans = val}
 
-assign :: Ctx -> Var -> Double -> InputT IO ()
+assign :: Ctx -> Var -> N -> InputT IO ()
 assign ctx name value = do
     outputStrLn $ show value
     loop $ case name of

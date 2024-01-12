@@ -1,11 +1,12 @@
 module Calc.Expr (Expr (..)) where
 
 import qualified Data.Text as T
+import Calc.N
 
 type Text = T.Text
 
 data Expr -- ^ The type of expressions
-    = Literal Double -- ^ just a number
+    = Literal N -- ^ just a number
     | F Expr -- ^ custom unary function
     | G Expr Expr -- ^ custom binary function
     | H Expr Expr Expr -- ^ custom ternary function
