@@ -14,12 +14,12 @@ Prefix `:f` and use `x` to define a unary (one-argument) function,
 NB: functions do not close over their environments, e.g.
 ```
 %> :a 1
-1.0
+1
 %> :f / x a
-%> f 3
-3.0
-%> :a f 2
-2.0
 %> f 4
-2.0
+4
+%> :a 2
+2
+%> f 4
+2
 ```

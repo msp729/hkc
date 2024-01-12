@@ -24,6 +24,10 @@ instance Fractional N where
     recip (I 1) = I 1
     recip (I (-1)) = I (-1)
     recip x = D $ recip $ d x
+    I a / I b = case divMod a b of
+        (x, 0) -> I x
+        (_, _) -> D (fromInteger a / fromInteger b)
+    a / b = D $ d a / d b
 
 instance Floating N where -- for this, we just work in the D wrapper
     pi = D pi
