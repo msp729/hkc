@@ -1,38 +1,70 @@
 module Calc.Expr (Expr (..)) where
 
-import qualified Data.Text as T
 import Calc.N
+import qualified Data.Text as T
 
 type Text = T.Text
 
-data Expr -- ^ The type of expressions
-    = Literal N -- ^ just a number
-    | F Expr -- ^ custom unary function
-    | G Expr Expr -- ^ custom binary function
-    | H Expr Expr Expr -- ^ custom ternary function
-    | Add Expr Expr -- ^ addition
-    | Sub Expr Expr -- ^ subtraction
-    | Neg Expr -- ^ negation
-    | Mul Expr Expr -- ^ multiplication
-    | Div Expr Expr -- ^ division
-    | Pow Expr Expr -- ^ exponentiation
-    | Rt Expr Expr -- ^ roots: rt a b = ^ a / 1 b
-    | Abs Expr -- ^ absolute value
-    | Signum Expr -- ^ signum
-    | Exp Expr -- ^ exponential function, base e
-    | Ln Expr -- ^ natural logarithm
-    | Lg Expr -- ^ common log
-    | Lb Expr -- ^ binary log
-    | Sin Expr -- ^ sine
-    | Cos Expr -- ^ cosine
-    | Tan Expr -- ^ tangent
-    | Asin Expr -- ^ arcsine
-    | Acos Expr -- ^ arccosine
-    | Atan Expr -- ^ arctangent
-    | Sinh Expr -- ^ hyperbolic sine
-    | Cosh Expr -- ^ hyperbolic cosine
-    | Tanh Expr -- ^ hyperbolic tangent: tanh x = / sinh x cosh x
-    | Asinh Expr -- ^ area hyperbolic sine
-    | Acosh Expr -- ^ area hyperbolic cosine
-    | Atanh Expr -- ^ area hyperbolic tangent
-    | Variable Text -- ^ variable reference
+data Expr
+    = -- \^ The type of expressions
+
+      -- | just a number
+      Literal N
+    | -- | custom unary function
+      F Expr
+    | -- | custom binary function
+      G Expr Expr
+    | -- | custom ternary function
+      H Expr Expr Expr
+    | -- | addition
+      Add Expr Expr
+    | -- | subtraction
+      Sub Expr Expr
+    | -- | negation
+      Neg Expr
+    | -- | multiplication
+      Mul Expr Expr
+    | -- | division
+      Div Expr Expr
+    | -- | exponentiation
+      Pow Expr Expr
+    | -- | roots: rt a b = ^ a / 1 b
+      Rt Expr Expr
+    | -- | absolute value
+      Abs Expr
+    | -- | signum
+      Signum Expr
+    | -- | exponential function, base e
+      Exp Expr
+    | -- | natural logarithm
+      Ln Expr
+    | -- | common log
+      Lg Expr
+    | -- | binary log
+      Lb Expr
+    | -- | sine
+      Sin Expr
+    | -- | cosine
+      Cos Expr
+    | -- | tangent
+      Tan Expr
+    | -- | arcsine
+      Asin Expr
+    | -- | arccosine
+      Acos Expr
+    | -- | arctangent
+      Atan Expr
+    | -- | hyperbolic sine
+      Sinh Expr
+    | -- | hyperbolic cosine
+      Cosh Expr
+    | -- | hyperbolic tangent: tanh x = / sinh x cosh x
+      Tanh Expr
+    | -- | area hyperbolic sine
+      Asinh Expr
+    | -- | area hyperbolic cosine
+      Acosh Expr
+    | -- | area hyperbolic tangent
+      Atanh Expr
+    | -- | variable reference
+      Variable Text

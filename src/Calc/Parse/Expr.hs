@@ -2,15 +2,16 @@
 
 module Calc.Parse.Expr (expr, fval, gval, hval, eval) where
 
-import Calc.Expr (Expr (..))
 import Calc.Common (Ctx (..))
+import Calc.Expr (Expr (..))
+import Calc.N
 import Calc.Parse.Common (binary, opts, ternary, unary)
+import Data.Complex
 import Data.Text (Text, pack)
 import Data.Void
 import Text.Megaparsec
-import Text.Megaparsec.Char (space, letterChar)
-import Text.Megaparsec.Char.Lexer (float, decimal, lexeme, symbol)
-import Calc.N
+import Text.Megaparsec.Char (letterChar, space)
+import Text.Megaparsec.Char.Lexer (decimal, float, lexeme, symbol)
 
 expr :: Parsec Void Text Expr
 expr =
@@ -28,6 +29,8 @@ expr =
                 , binary "/" Div expr expr
                 , binary "^" Pow expr expr
                 , binary "rt" Rt expr expr
+                , unary "sqrt" (\x -> Pow x $ Literal $ 1 / 2) expr
+                , unary "cbrt" (\x -> Pow x $ Literal $ 1 / 3) expr
                 , unary "_" Neg expr
                 , unary "exp" Exp expr
                 , unary "ln" Ln expr
@@ -46,8 +49,11 @@ expr =
                 , unary "p" (Neg . Lg) expr
                 , unary "P" (Pow (Literal 10) . Neg) expr
                 , Variable "ans" <$ symbol space "ans"
-                , Variable . pack . (:[]) <$> letterChar
+                , Variable . pack . (: []) <$> letterChar
                 ]
+
+imag :: Expr
+imag = Literal $ C $ 0 :+ 1
 
 fval :: Expr -> Expr -> Expr
 fval (Literal x) _ = Literal x
@@ -79,6 +85,7 @@ fval (Mul e1 e2) x = Mul (fval e1 x) (fval e2 x)
 fval (Div e1 e2) x = Div (fval e1 x) (fval e2 x)
 fval (Pow e1 e2) x = Pow (fval e1 x) (fval e2 x)
 fval (Rt e1 e2) x = Rt (fval e1 x) (fval e2 x)
+fval (Variable "i") _ = imag
 fval (Variable "x") x = x
 fval x _ = x
 
@@ -112,6 +119,7 @@ gval (Mul e1 e2) x y = Mul (gval e1 x y) (gval e2 x y)
 gval (Div e1 e2) x y = Div (gval e1 x y) (gval e2 x y)
 gval (Pow e1 e2) x y = Pow (gval e1 x y) (gval e2 x y)
 gval (Rt e1 e2) x y = Rt (gval e1 x y) (gval e2 x y)
+gval (Variable "i") _ _ = imag
 gval (Variable "x") x _ = x
 gval (Variable "y") _ y = y
 gval x _ _ = x
@@ -146,6 +154,7 @@ hval (Mul e1 e2) x y z = Mul (hval e1 x y z) (hval e2 x y z)
 hval (Div e1 e2) x y z = Div (hval e1 x y z) (hval e2 x y z)
 hval (Pow e1 e2) x y z = Pow (hval e1 x y z) (hval e2 x y z)
 hval (Rt e1 e2) x y z = Rt (hval e1 x y z) (hval e2 x y z)
+hval (Variable "i") _ _ _ = imag
 hval (Variable "x") x _ _ = x
 hval (Variable "y") _ y _ = y
 hval (Variable "z") _ _ z = z
@@ -181,6 +190,7 @@ eval ctx (Mul x y) = (*) <$> eval ctx x <*> eval ctx y
 eval ctx (Div x y) = (/) <$> eval ctx x <*> eval ctx y
 eval ctx (Pow x y) = (**) <$> eval ctx x <*> eval ctx y
 eval ctx (Rt x y) = (**) <$> eval ctx x <*> fmap recip (eval ctx y)
+eval _ (Variable "i") = Just $ C $ 0 :+ 1
 eval ctx (Variable "a") = Just $ a ctx
 eval ctx (Variable "b") = Just $ b ctx
 eval ctx (Variable "c") = Just $ c ctx
