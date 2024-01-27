@@ -3,7 +3,7 @@
 module Calc.Parse.Command (command) where
 
 import Calc.Command (Command (..), Fun (..), Var (..))
-import Calc.Parse.Common (opts, unary, binary, ternary)
+import Calc.Parse.Common (binary, opts, ternary, unary)
 import Calc.Parse.Expr (expr)
 import Data.Text (Text)
 import Data.Void (Void)
