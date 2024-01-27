@@ -25,6 +25,8 @@ NB: functions do not close over their environments, e.g.
 ```
 ## Equation-Solving!
 `:0` takes two (or three) arguments:
-an initial guess and a function to set to 0 (`:0 1 x` gives `0`),
-or a specified precision and then those two things (`:0 1e-10 5 ^x2` gives approximately `9.5e-6`)
+
+- an initial guess and a function to set to 0 (`:0 1 x` gives `0`),
+- or a specified precision and then those two things (`:0 1e-10 5 ^x2` gives approximately `9.5e-6`)
+
 The default precision is `1e-15`.
