@@ -1,5 +1,4 @@
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE Safe #-}
 
 module Calc.Parse.Command (command) where
 

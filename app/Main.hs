@@ -9,7 +9,7 @@ import System.Console.Haskeline.Completion ()
 import Text.Megaparsec (errorBundlePretty, runParser)
 import Prelude hiding (getLine)
 import Data.Text (pack)
-import Calc.N hiding(C) 
+import Calc.N
 
 ds, st :: Settings IO
 ds = defaultSettings

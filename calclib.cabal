@@ -43,6 +43,8 @@ library
       base >=4.7 && <5
     , haskeline
     , megaparsec
+    , numbers
+    , spoon
     , text
     , transformers
   default-language: Haskell2010
@@ -61,6 +63,8 @@ executable hkc
     , calclib
     , haskeline
     , megaparsec
+    , numbers
+    , spoon
     , text
     , transformers
   default-language: Haskell2010
@@ -80,6 +84,8 @@ test-suite calc-test
     , calc
     , haskeline
     , megaparsec
+    , numbers
+    , spoon
     , text
     , transformers
   default-language: Haskell2010

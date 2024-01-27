@@ -25,6 +25,8 @@ dependencies:
 - megaparsec
 - haskeline
 - transformers
+- numbers
+- spoon
 
 ghc-options:
 - -Wall

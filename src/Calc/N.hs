@@ -1,91 +1,118 @@
+{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE PatternSynonyms #-}
 {-# LANGUAGE Strict #-}
 {-# LANGUAGE ViewPatterns #-}
 
-module Calc.N (N (I, D, C), pattern R, pattern Z) where
+module Calc.N (N (), unN, unZ, unQ, unR, unC, pattern MkZ, pattern MkQ, pattern MkR, pattern MkC) where
 
-import Data.Complex
+import Control.Spoon (teaspoon)
+import Data.Complex (Complex((:+)), magnitude)
+import Data.Number.BigFloat (BigFloat, Prec10, Prec50)
+import Data.Ratio ((%))
 
-data N = I Integer | D Double | C (Complex Double)
+type ℤ = Integer
+type ℚ = Rational
+type ℝ = BigFloat Prec50
+type ℂ = Complex ℝ
 
-nm :: (Integer -> a) -> (Double -> a) -> (Complex Double -> a) -> N -> a
-nm f _ _ (I k) = f k
-nm _ f _ (R x) = f x
-nm _ _ f (Z z) = f z
+data N = Z ℤ | Q ℚ | R ℝ | C ℂ
 
-nm' :: (Integer -> Integer) -> (Double -> Double) -> (Complex Double -> Complex Double) -> N -> N
-nm' f _ _ (I k) = I (f k)
-nm' _ f _ (R x) = D (f x)
-nm' _ _ f (Z z) = C (f z)
+unN :: (ℤ -> a) -> (ℚ -> a) -> (ℝ -> a) -> (ℂ -> a) -> (N -> a)
+unN f _ _ _ (Z n) = f n
+unN _ f _ _ (Q q) = f q
+unN _ _ f _ (R x) = f x
+unN _ _ _ f (C z) = f z
 
-nf :: (Double -> Bool) -> (Double -> Double) -> (Complex Double -> Complex Double) -> N -> N
-nf p f g (R x) = if p x then R (f x) else Z (g (x :+ 0))
-nf p f g (C z) = C (g z)
+class IN a where insert :: a -> N
+instance IN ℤ where insert = Z
+instance IN ℚ where insert = Q
+instance IN ℝ where insert = R
+instance IN ℂ where insert = C
 
-c :: N -> Complex Double
-c (I n) = fromInteger n :+ 0
-c (D x) = x :+ 0
-c (C z) = z
+unN' :: (IN a, IN b, IN c, IN d) => (ℤ -> a) -> (ℚ -> b) -> (ℝ -> c) -> (ℂ -> d) -> (N -> N)
+unN' z q r c = unN (insert . z) (insert . q) (insert . r) (insert . c)
 
-r :: N -> Maybe Double
-r (I n) = Just $ fromInteger n
-r (D x) = Just x
-r (C (x :+ 0)) = Just x
-r _ = Nothing
+unNF :: (IN a, IN b) => (ℝ -> a) -> (ℂ -> b) -> N -> N
+unNF r = unN' (r . fromInteger) (r . fromRational) r
 
-{-# INLINE nm #-}
-{-# INLINE nm' #-}
-{-# INLINE c #-}
-{-# INLINE r #-}
-{-# INLINE R #-}
-{-# INLINE Z #-}
+unNF' :: (IN a, IN b) => (ℝ -> a) -> (ℂ -> b) -> N -> N
+unNF' r c = unN (r' . fromInteger) (r' . fromRational) r' (insert . c)
+  where
+    r' :: ℝ -> N
+    r' x = maybe (insert $ c $ x :+ 0) insert $ teaspoon $ r x
 
-pattern R :: Double -> N
-pattern R x <- (r -> Just x) where R x = D x
+unZ :: N -> Maybe ℤ
+unZ = unN Just n n n where n = const Nothing
 
-pattern Z :: Complex Double -> N
-pattern Z z <- (c -> z) where Z z = C z
+unQ :: N -> Maybe ℚ
+unQ = unN (Just . (% 1)) Just n n where n = const Nothing
 
-{-# COMPLETE Z #-}
-{-# COMPLETE R, C #-}
+unR :: N -> Maybe ℝ
+unR = unN (Just . fromInteger) (Just . fromRational) Just n where n = const Nothing
+
+unC :: N -> ℂ
+unC = unN fromInteger fromRational (:+ 0) id
+
+pattern MkZ :: ℤ -> N
+pattern MkZ n = Z n
+
+pattern MkQ :: ℚ -> N
+pattern MkQ q <- (unQ -> Just q) where MkQ q = Q q
+
+pattern MkR :: ℝ -> N
+pattern MkR x <- (unR -> Just x) where MkR x = R x
+
+pattern MkC :: ℂ -> N
+pattern MkC z <- (unC -> z) where MkC z = C z
+
+{-# COMPLETE MkC #-}
+{-# COMPLETE MkR, C #-}
+{-# COMPLETE MkQ, R, C #-}
+{-# COMPLETE MkZ, Q, R, C #-}
 
 instance Num N where
-    I a + I b = I (a + b)
-    R a + R b = R (a + b)
-    a + b = C (c a + c b)
-    I a * I b = I (a * b)
-    R a * R b = R (a * b)
-    a * b = C (c a * c b)
-    abs = nm (I . abs) (R . abs) (D . magnitude)
-    signum = nm (I . signum) (R . signum) (C . signum)
-    fromInteger = I
-    negate = nm' negate negate negate
+    MkZ a + MkZ b = MkZ (a + b)
+    MkQ a + MkQ b = MkQ (a + b)
+    MkR a + MkR b = MkR (a + b)
+    MkC a + MkC b = MkC (a + b)
+    MkZ a * MkZ b = MkZ (a * b)
+    MkQ a * MkQ b = MkQ (a * b)
+    MkR a * MkR b = MkR (a * b)
+    MkC a * MkC b = MkC (a * b)
+    abs = unN' abs abs abs magnitude
+    signum = unN' abs abs abs abs
+    fromInteger = MkZ
+    negate = unN' negate negate negate negate
 
 instance Fractional N where
-    I n / I m = case divMod n m of
-        (x, 0) -> I x
-        (_, _) -> R (fromInteger n / fromInteger m)
-    R x / R y = R (x / y)
-    Z a / Z b = C (a / b)
-    fromRational = R . fromRational
+    fromRational = MkQ
+    MkZ a / MkZ b = case divMod a b of
+        (c, 0) -> MkZ c
+        _ -> MkQ (a % b)
+    MkQ a / MkQ b = MkQ (a / b)
+    MkR a / MkR b = MkR (a / b)
+    MkC a / MkC b = MkC (a / b)
 
 instance Floating N where
     pi = R pi
-    exp = nm (R . exp . fromInteger) (D . exp) (C . exp)
-    log = nf (> 0) log log
-    sin = nm (R . sin . fromInteger) (D . sin) (C . sin)
-    cos = nm (R . cos . fromInteger) (D . cos) (C . cos)
-    asin = nf ((<= 1) . abs) asin asin
-    acos = nf ((<= 1) . abs) acos acos
-    atan = nm (R . atan . fromInteger) (D . atan) (C . atan)
-    sinh = nm (R . sinh . fromInteger) (D . sinh) (C . sinh)
-    cosh = nm (R . cosh . fromInteger) (D . cosh) (C . cosh)
-    asinh = nm (R . asinh . fromInteger) (D . asinh) (C . asinh)
-    acosh = nf (>= 1) acosh acosh
-    atanh = nf ((<= 1) . abs) atanh atanh
-    I a ** I b | b >= 0 = I (a ^ b)
-    R a ** R b = let out = a ** b in if isNaN out then C ((a :+ 0) ** (b :+ 0)) else D out
-    Z a ** Z b = Z (a ** b)
+    exp = unNF exp exp
+    log = unNF' log log
+    sin = unNF sin sin
+    cos = unNF cos cos
+    asin = unNF' asin asin
+    acos = unNF' acos acos
+    atan = unNF' atan atan
+    sinh = unNF sinh sinh
+    cosh = unNF cosh cosh
+    asinh = unNF asinh asinh
+    acosh = unNF' acosh acosh
+    atanh = unNF' atanh atanh
 
 instance Show N where
-    show = nm show show (\(a :+ b) -> show a ++ " + " ++ show b ++ "i")
+    show = unN show show show' (\(a :+ b) -> show' a ++ " + " ++ show' b ++ "i")
+      where
+        show' :: ℝ -> String
+        show' =
+            show
+                . uncurry (encodeFloat :: Integer -> Int -> BigFloat Prec10)
+                . decodeFloat

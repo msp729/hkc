@@ -1,10 +1,11 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE PatternSynonyms #-}
 
 module Calc.Parse.Expr (expr, fval, gval, hval, eval) where
 
 import Calc.Common (Ctx (..))
 import Calc.Expr (Expr (..))
-import Calc.N
+import Calc.N (N, pattern MkC, pattern MkR, pattern MkZ)
 import Calc.Parse.Common (binary, opts, ternary, unary)
 import Data.Complex
 import Data.Text (Text, pack)
@@ -18,8 +19,8 @@ expr =
     label "An expression" $
         lexeme space $
             opts
-                [ Literal . D <$> float
-                , Literal . I <$> decimal
+                [ Literal . MkR <$> float
+                , Literal . MkZ <$> decimal
                 , unary "f" F expr
                 , binary "g" G expr expr
                 , ternary "h" H expr expr expr
@@ -53,7 +54,10 @@ expr =
                 ]
 
 imag :: Expr
-imag = Literal $ C $ 0 :+ 1
+imag = Literal im
+
+im :: N
+im = MkC $ 0 :+ 1
 
 fval :: Expr -> Expr -> Expr
 fval (Literal x) _ = Literal x
@@ -190,7 +194,7 @@ eval ctx (Mul x y) = (*) <$> eval ctx x <*> eval ctx y
 eval ctx (Div x y) = (/) <$> eval ctx x <*> eval ctx y
 eval ctx (Pow x y) = (**) <$> eval ctx x <*> eval ctx y
 eval ctx (Rt x y) = (**) <$> eval ctx x <*> fmap recip (eval ctx y)
-eval _ (Variable "i") = Just $ C $ 0 :+ 1
+eval _ (Variable "i") = Just im
 eval ctx (Variable "a") = Just $ a ctx
 eval ctx (Variable "b") = Just $ b ctx
 eval ctx (Variable "c") = Just $ c ctx
