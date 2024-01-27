@@ -8,8 +8,8 @@ module Calc.N (N (), unN, unZ, unQ, unR, unC, pattern MkZ, pattern MkQ, pattern 
 import Control.Spoon (teaspoon)
 import Data.Complex (Complex ((:+)), magnitude)
 import Data.Number.BigFloat (BigFloat, Prec10, Prec50)
-import Data.Ratio ((%))
 import Data.Ord (comparing)
+import Data.Ratio ((%))
 
 type ℤ = Integer
 type ℚ = Rational
@@ -112,11 +112,15 @@ instance Floating N where
 instance Show N where
     show = unN show show show' (\(a :+ b) -> show' a ++ " + " ++ show' b ++ "i")
       where
+        s :: Int
+        s = 20
+
         show' :: ℝ -> String
-        show' =
-            show
-                . uncurry (encodeFloat :: Integer -> Int -> BigFloat Prec10)
-                . decodeFloat
+        show' x =
+            let (m, e) = decodeFloat x
+             in let (m', e') = (div m (10 ^ (s :: Int)), e + s)
+                 in let unscaled = encodeFloat m' 0 :: Double
+                     in show $ unscaled * (10 ** fromInteger (toInteger e'))
 
 instance Eq N where
     MkC a == MkC b = a == b
