@@ -64,5 +64,5 @@ packages:
 # extra-lib-dirs: [/path/to/dir]
 #
 # Allow a newer minor version of GHC than the snapshot specifies
-compiler: ghc-9.4.7
+compiler: ghc-9.8.1
 # compiler-check: newer-minor

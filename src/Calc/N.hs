@@ -3,21 +3,55 @@
 {-# LANGUAGE Strict #-}
 {-# LANGUAGE ViewPatterns #-}
 
-module Calc.N (N (), unN, unZ, unQ, unR, unC, pattern MkZ, pattern MkQ, pattern MkR, pattern MkC) where
+{- |
+
+Module      : Calc.N
+Description : A numeric type built for precision and generality.
+-}
+module Calc.N (
+    N (),
+    unN,
+    unZ,
+    unQ,
+    unR,
+    unC,
+    pattern MkZ,
+    pattern MkQ,
+    pattern MkR,
+    pattern MkC,
+    ℤ,
+    ℚ,
+    ℝ,
+    ℂ,
+) where
 
 import Control.Spoon (teaspoon)
 import Data.Complex (Complex ((:+)), magnitude)
-import Data.Number.BigFloat (BigFloat, Prec10, Prec50)
+import Data.Number.BigFloat (BigFloat, Prec50)
 import Data.Ord (comparing)
-import Data.Ratio ((%))
+import Data.Ratio ((%), numerator, denominator)
 
+-- | A fun type alias.
 type ℤ = Integer
+
+-- | Another fun type alias.
 type ℚ = Rational
+
+-- | Not quite true, but a decent approximation.
 type ℝ = BigFloat Prec50
+
+-- | Again, not quite true, but so be it.
 type ℂ = Complex ℝ
 
+{- | A datatype that is either:
+- an integer (`ℤ`)
+- a rational number (`ℚ`)
+- a real number (`ℝ`)
+- or a complex number (`ℂ`)
+-}
 data N = Z ℤ | Q ℚ | R ℝ | C ℂ
 
+-- | Pattern matching on 'N'.
 unN :: (ℤ -> a) -> (ℚ -> a) -> (ℝ -> a) -> (ℂ -> a) -> (N -> a)
 unN f _ _ _ (Z n) = f n
 unN _ f _ _ (Q q) = f q
@@ -57,12 +91,15 @@ unC = unN fromInteger fromRational (:+ 0) id
 pattern MkZ :: ℤ -> N
 pattern MkZ n = Z n
 
+-- | A pattern that matches any integers or rationals
 pattern MkQ :: ℚ -> N
 pattern MkQ q <- (unQ -> Just q) where MkQ q = Q q
 
+-- | A pattern that matches anything except complex numbers
 pattern MkR :: ℝ -> N
 pattern MkR x <- (unR -> Just x) where MkR x = R x
 
+-- | A pattern that matches everything, but casts to 'ℂ'.
 pattern MkC :: ℂ -> N
 pattern MkC z <- (unC -> z) where MkC z = C z
 
@@ -110,7 +147,7 @@ instance Floating N where
     atanh = unNF' atanh atanh
 
 instance Show N where
-    show = unN show show show' (\(a :+ b) -> show' a ++ " + " ++ show' b ++ "i")
+    show = unN show (\q -> show (numerator q) ++ " / " ++ show (denominator q)) show' (\(a :+ b) -> show' a ++ " + " ++ show' b ++ "i")
       where
         s :: Int
         s = 20

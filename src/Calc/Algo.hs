@@ -4,7 +4,9 @@ module Calc.Algo (deriv) where
 
 import Calc.Common
 import Calc.Expr
+import Calc.Parse.Expr (fval, gval, hval)
 
+-- | `replaceX x f` deeply replaces `Variable "x"` in `f` with `x`
 replaceX :: Expr -> Expr -> Expr
 replaceX x = runExpr p (const x)
   where
@@ -12,6 +14,7 @@ replaceX x = runExpr p (const x)
     p (Variable "x") = True
     p _ = False
 
+-- | `replaceY x y f` deeply replaces `Variable "x"` with `x` and `Variable "y"` with `y` in `f`
 replaceY :: Expr -> Expr -> Expr -> Expr
 replaceY x y = runExpr p d
   where
@@ -24,6 +27,9 @@ replaceY x y = runExpr p d
     d (Variable "y") = y
     d _ = 0
 
+{- | `replaceZ x y z f` deeply replaces `Variable "x"` with `x`,
+`Variable "y"` with `y`, and `Variable "z"` with `z` in `f`
+-}
 replaceZ :: Expr -> Expr -> Expr -> Expr -> Expr
 replaceZ x y z = runExpr p d
   where
@@ -38,6 +44,7 @@ replaceZ x y z = runExpr p d
     d (Variable "z") = z
     d _ = 0
 
+-- | Takes the derivative w.r.t x
 deriv :: Ctx -> Expr -> Expr
 deriv ctx (F x) = deriv ctx $ replaceX x $ f ctx
 deriv ctx (G x y) = deriv ctx $ replaceY x y $ g ctx
