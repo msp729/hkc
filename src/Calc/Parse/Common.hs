@@ -2,7 +2,7 @@
 {-# LANGUAGE Safe #-}
 {-# LANGUAGE TypeOperators #-}
 
-module Calc.Parse.Common (opts, accept, unary, binary, ternary) where
+module Calc.Parse.Common (opts, accept, nullary, unary, binary, ternary) where
 
 import Control.Applicative (asum)
 import Control.Monad (void)
@@ -16,6 +16,9 @@ accept = void . symbol space
 
 opts :: (Foldable f, Functor f, Ord e, Stream s) => f (ParsecT e s m a) -> ParsecT e s m a
 opts = asum . fmap try
+
+nullary :: (MonadParsec e Text m) => Text -> b -> m b
+nullary fname fval = label (unpack fname) $ fval <$ accept fname
 
 unary :: (MonadParsec e Text m) => Text -> (a -> b) -> m a -> m b
 unary fname fval operand = label (unpack fname) $ fmap fval $ accept fname *> operand

@@ -6,7 +6,7 @@ module Calc.Parse.Expr (expr, fval, gval, hval, eval) where
 import Calc.Common (Ctx (..))
 import Calc.Expr (Expr (..))
 import Calc.N (N, pattern MkC, pattern MkR, pattern MkZ)
-import Calc.Parse.Common (binary, opts, ternary, unary)
+import Calc.Parse.Common (binary, nullary, opts, ternary, unary)
 import Data.Complex
 import Data.Text (Text, pack)
 import Data.Void
@@ -34,6 +34,7 @@ expr =
                 , unary "cbrt" (\x -> Pow x $ Literal $ 1 / 3) expr
                 , unary "_" Neg expr
                 , unary "exp" Exp expr
+                , nullary "e" (Literal (exp 1))
                 , unary "ln" Ln expr
                 , unary "sin" Sin expr
                 , unary "cos" Cos expr
@@ -47,8 +48,10 @@ expr =
                 , unary "asinh" Asinh expr
                 , unary "acosh" Acosh expr
                 , unary "atanh" Atanh expr
+                , nullary "pi" (Literal pi)
                 , unary "p" (Neg . Lg) expr
                 , unary "P" (Pow (Literal 10) . Neg) expr
+                , nullary "i" (Literal (MkC (0 :+ 1)))
                 , Variable "ans" <$ symbol space "ans"
                 , Variable . pack . (: []) <$> letterChar
                 ]

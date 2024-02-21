@@ -30,3 +30,7 @@ NB: functions do not close over their environments, e.g.
 - or a specified precision and then those two things (`:0 1e-10 5 ^x2` gives approximately `9.5e-6`)
 
 The default precision is `1e-15`.
+
+## newest feature (as of the README's most recent update):
+### constants (pi, e)
+Turns out I forgot to add them as a feature. My bad.
