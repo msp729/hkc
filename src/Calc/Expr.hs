@@ -111,3 +111,40 @@ instance Num Expr where
 instance Fractional Expr where
     fromRational = Literal . fromRational
     (/) = Div
+
+instance Show Expr where
+    show (Variable v) = T.unpack v
+    show (Literal x) = show x
+    show (F e1) = "f " ++ arg e1
+    show (G e1 e2) = "g " ++ arg e1 ++ " " ++ arg e2
+    show (H e1 e2 e3) = "h " ++ arg e1 ++ " " ++ arg e2
+    show (Add e1 e2) = "add " ++ arg e1 ++ " " ++ arg e2
+    show (Sub e1 e2) = "sub " ++ arg e1 ++ " " ++ arg e2
+    show (Neg e1) = "neg " ++ arg e1
+    show (Mul e1 e2) = "mul " ++ arg e1 ++ " " ++ arg e2
+    show (Div e1 e2) = "div " ++ arg e1 ++ " " ++ arg e2
+    show (Pow e1 e2) = "pow " ++ arg e1 ++ " " ++ arg e2
+    show (Rt e1 e2) = "rt " ++ arg e1 ++ " " ++ arg e2
+    show (Abs e1) = "abs " ++ arg e1
+    show (Signum e1) = "signum " ++ arg e1
+    show (Exp e1) = "exp " ++ arg e1
+    show (Ln e1) = "ln " ++ arg e1
+    show (Lg e1) = "lg " ++ arg e1
+    show (Lb e1) = "lb " ++ arg e1
+    show (Sin e1) = "sin " ++ arg e1
+    show (Cos e1) = "cos " ++ arg e1
+    show (Tan e1) = "tan " ++ arg e1
+    show (Asin e1) = "asin " ++ arg e1
+    show (Acos e1) = "acos " ++ arg e1
+    show (Atan e1) = "atan " ++ arg e1
+    show (Sinh e1) = "sinh " ++ arg e1
+    show (Cosh e1) = "cosh " ++ arg e1
+    show (Tanh e1) = "tanh " ++ arg e1
+    show (Asinh e1) = "asinh " ++ arg e1
+    show (Acosh e1) = "acosh " ++ arg e1
+    show (Atanh e1) = "atanh " ++ arg e1
+
+arg :: Expr -> String
+arg e@(Variable _) = show e
+arg e@(Literal _) = show e
+arg e = "(" ++ show e ++ ")"

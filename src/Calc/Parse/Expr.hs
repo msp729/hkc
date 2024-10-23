@@ -5,7 +5,7 @@ module Calc.Parse.Expr (expr, fval, gval, hval, eval) where
 
 import Calc.Common (Ctx (..))
 import Calc.Expr (Expr (..))
-import Calc.N (N, pattern MkC, pattern MkR, pattern MkZ)
+import Calc.N (N, lb, lg, pow, rt, pattern MkC, pattern MkR, pattern MkZ)
 import Calc.Parse.Common (binary, nullary, opts, ternary, unary)
 import Data.Complex
 import Data.Text (Text, pack)
@@ -33,9 +33,13 @@ expr =
                 , unary "sqrt" (\x -> Pow x $ Literal $ 1 / 2) expr
                 , unary "cbrt" (\x -> Pow x $ Literal $ 1 / 3) expr
                 , unary "_" Neg expr
+                , unary "abs" Abs expr
+                , unary "sgn" Signum expr
                 , unary "exp" Exp expr
                 , nullary "e" (Literal (exp 1))
                 , unary "ln" Ln expr
+                , unary "lg" Lg expr
+                , unary "lb" Lb expr
                 , unary "sin" Sin expr
                 , unary "cos" Cos expr
                 , unary "tan" Tan expr
@@ -175,8 +179,8 @@ eval ctx (Abs x) = abs <$> eval ctx x
 eval ctx (Signum x) = signum <$> eval ctx x
 eval ctx (Exp x) = exp <$> eval ctx x
 eval ctx (Ln x) = log <$> eval ctx x
-eval ctx (Lg x) = logBase 10 <$> eval ctx x
-eval ctx (Lb x) = logBase 2 <$> eval ctx x
+eval ctx (Lg x) = lg <$> eval ctx x
+eval ctx (Lb x) = lb <$> eval ctx x
 eval ctx (Sin x) = sin <$> eval ctx x
 eval ctx (Cos x) = cos <$> eval ctx x
 eval ctx (Tan x) = tan <$> eval ctx x
@@ -193,8 +197,8 @@ eval ctx (Add x y) = (+) <$> eval ctx x <*> eval ctx y
 eval ctx (Sub x y) = (-) <$> eval ctx x <*> eval ctx y
 eval ctx (Mul x y) = (*) <$> eval ctx x <*> eval ctx y
 eval ctx (Div x y) = (/) <$> eval ctx x <*> eval ctx y
-eval ctx (Pow x y) = (**) <$> eval ctx x <*> eval ctx y
-eval ctx (Rt x y) = (**) <$> eval ctx x <*> fmap recip (eval ctx y)
+eval ctx (Pow x y) = pow <$> eval ctx x <*> eval ctx y
+eval ctx (Rt x y) = rt <$> eval ctx x <*> eval ctx y
 eval _ (Variable "i") = Just im
 eval ctx (Variable "a") = Just $ a ctx
 eval ctx (Variable "b") = Just $ b ctx

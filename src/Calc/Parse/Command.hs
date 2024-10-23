@@ -25,4 +25,5 @@ command =
             , unary ":h" (Define H) expr
             , Quit <$ symbol space ":q"
             , Calculate <$> expr
+            , return Nil
             ]

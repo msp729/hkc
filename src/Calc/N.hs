@@ -23,13 +23,17 @@ module Calc.N (
     ℚ,
     ℝ,
     ℂ,
+    lb,
+    lg,
+    pow,
+    rt,
 ) where
 
 import Control.Spoon (teaspoon)
 import Data.Complex (Complex ((:+)), magnitude)
 import Data.Number.BigFloat (BigFloat, Prec50)
 import Data.Ord (comparing)
-import Data.Ratio ((%), numerator, denominator)
+import Data.Ratio (denominator, numerator, (%))
 
 -- | A fun type alias.
 type ℤ = Integer
@@ -117,8 +121,8 @@ instance Num N where
     MkQ a * MkQ b = MkQ (a * b)
     MkR a * MkR b = MkR (a * b)
     MkC a * MkC b = MkC (a * b)
-    abs = unN' abs abs abs magnitude
-    signum = unN' abs abs abs abs
+    abs = unN' abs abs abs abs
+    signum = unN' signum signum signum signum
     fromInteger = MkZ
     negate = unN' negate negate negate negate
 
@@ -147,7 +151,12 @@ instance Floating N where
     atanh = unNF' atanh atanh
 
 instance Show N where
-    show = unN show (\q -> show (numerator q) ++ " / " ++ show (denominator q)) show' (\(a :+ b) -> show' a ++ " + " ++ show' b ++ "i")
+    show =
+        unN
+            show
+            (\q -> show (numerator q) ++ " / " ++ show (denominator q))
+            show'
+            (\(a :+ b) -> show' a ++ " + " ++ show' b ++ "i")
       where
         s :: Int
         s = 20
@@ -155,12 +164,60 @@ instance Show N where
         show' :: ℝ -> String
         show' x =
             let (m, e) = decodeFloat x
-             in let (m', e') = (div m (10 ^ (s :: Int)), e + s)
+             in let (m', e') = (div m (10 ^ s), e + s)
                  in let unscaled = encodeFloat m' 0 :: Double
                      in show $ unscaled * (10 ** fromInteger (toInteger e'))
 
 instance Eq N where
     MkC a == MkC b = a == b
+
+{- | binary scan: like binary search, but a little fancier
+if f(hi) < target, it doubles its search range (hi -> 2*hi - lo)
+if f(lo) > target, it doubles its search range in the other direction (lo -> 2*lo - hi)
+if it has a correct value (f(x) == target), it returns (True, x)
+if it has a "supremum" (f(x) < target, f(x+1) > target), it returns (False, x)
+it works like binary search though, so it's generally pretty fast.
+-}
+bscan :: (Ord a) => (Integer -> a) -> Integer -> Integer -> a -> (Bool, Integer)
+bscan f l h x
+    | f h < x = bscan f l (2 * h - l) x
+    | f l > x = bscan f (2 * l - h) h x
+    | f h == x = (True, h)
+    | f l == x = (True, l)
+    | h - l == 1 = (False, l)
+    | otherwise =
+        let m = div (l + h) 2
+         in case compare (f m) x of
+                LT -> bscan f m h x
+                GT -> bscan f l m x
+                EQ -> bscan f l h x
+
+bscan' :: (Ord a) => (Integer -> a) -> a -> Maybe Integer
+bscan' f t = let (b, x) = bscan f 0 1 t in if b then Just x else Nothing
+
+lg :: N -> N
+lg (MkZ n) | n > 0, (True, k) <- bscan (10 ^) 0 1 n = MkZ k
+lg (MkQ q) | q > 0, (True, k) <- bscan (10 ^) 0 1 q = MkZ k
+lg x = logBase 10 x
+
+lb :: N -> N
+lb (MkZ n) | n > 0, (True, k) <- bscan (2 ^) 0 1 n = MkZ k
+lb (MkQ q) | q > 0, (True, k) <- bscan (2 ^) 0 1 q = MkZ k
+lb x = logBase 2 x
+
+pow :: N -> N -> N
+pow x (MkZ y) = x ^ y
+pow (MkZ x) (MkQ q) | (True, b) <- bscan (^ denominator q) 0 1 x = MkZ $ b ^ numerator q
+pow (MkQ q1) (MkQ q2)
+    | (Just n) <- bscan' (^ denominator q2) (numerator q1)
+    , (Just d) <- bscan' (^ denominator q2) (denominator q1) =
+        MkQ $ (n % d) ^ (numerator q2)
+pow (MkR x) (MkR y) | Just z <- teaspoon (x ** y) = MkR z
+pow (MkC x) (MkC y) = MkC $ x ** y
+
+rt :: N -> N -> N
+rt x 1 = x
+rt x y = pow x $ 1 / y
 
 instance Ord N where
     compare = comparing (magnitude . unC)

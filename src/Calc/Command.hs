@@ -12,3 +12,4 @@ data Command
     | Assign Var Expr
     | Define Fun Expr
     | Quit
+    | Nil

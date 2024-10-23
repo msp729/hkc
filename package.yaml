@@ -62,4 +62,4 @@ tests:
     - -rtsopts
     - -with-rtsopts=-N
     dependencies:
-    - calc
+    - calclib
