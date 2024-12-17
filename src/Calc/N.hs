@@ -211,7 +211,7 @@ pow (MkZ x) (MkQ q) | (True, b) <- bscan (^ denominator q) 0 1 x = MkZ $ b ^ num
 pow (MkQ q1) (MkQ q2)
     | (Just n) <- bscan' (^ denominator q2) (numerator q1)
     , (Just d) <- bscan' (^ denominator q2) (denominator q1) =
-        MkQ $ (n % d) ^ (numerator q2)
+        MkQ $ (n % d) ^ numerator q2
 pow (MkR x) (MkR y) | Just z <- teaspoon (x ** y) = MkR z
 pow (MkC x) (MkC y) = MkC $ x ** y
 

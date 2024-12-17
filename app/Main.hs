@@ -1,7 +1,7 @@
 module Main (main) where
 
+import Calc.Prog (ci, loop, newton, st)
 import System.Console.Haskeline (runInputT)
-import Calc.Prog (newton, st, loop, ci)
 
 main :: IO ()
 main = do

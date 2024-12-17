@@ -13,7 +13,7 @@ import Text.Megaparsec (errorBundlePretty, runParser)
 import Prelude hiding (getLine)
 
 st :: Settings IO
-st = (defaultSettings :: Settings IO){complete = noCompletion}
+st = (defaultSettings :: Settings IO) {complete = noCompletion}
 
 newton :: Int -> Ctx -> N -> N -> Expr -> Expr -> Maybe N
 newton n ctx eps v0 e e'
@@ -47,12 +47,12 @@ loop ctx = do
                         v0' <- eval ctx v0
                         newton 0 ctx eps' v0' fn (deriv ctx fn)
                     Calculate e -> do
-                        outputStrLn $ show $ e
+                        outputStrLn $ show e
                         maybe (bad ctx) (good ctx) $ eval ctx e
                     Assign v e -> maybe (bad ctx) (assign ctx v) $ eval ctx e
-                    Define F e -> loop ctx{f = e}
-                    Define G e -> loop ctx{g = e}
-                    Define H e -> loop ctx{h = e}
+                    Define F e -> loop ctx {f = e}
+                    Define G e -> loop ctx {g = e}
+                    Define H e -> loop ctx {h = e}
                     Quit -> outputStrLn "Have a nice day!"
                     Nil -> loop ctx
 
@@ -64,12 +64,12 @@ bad ctx = do
 good :: Ctx -> N -> InputT IO ()
 good ctx val = do
     outputStrLn $ show val
-    loop $ ctx{ans = val}
+    loop $ ctx {ans = val}
 
 assign :: Ctx -> Var -> N -> InputT IO ()
 assign ctx name value = do
     outputStrLn $ show value
     loop $ case name of
-        A -> ctx{a = value}
-        B -> ctx{b = value}
-        C -> ctx{c = value}
+        A -> ctx {a = value}
+        B -> ctx {b = value}
+        C -> ctx {c = value}
