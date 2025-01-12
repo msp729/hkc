@@ -47,7 +47,6 @@ loop ctx = do
                         v0' <- eval ctx v0
                         newton 0 ctx eps' v0' fn (deriv ctx fn)
                     Calculate e -> do
-                        outputStrLn $ show e
                         maybe (bad ctx) (good ctx) $ eval ctx e
                     Assign v e -> maybe (bad ctx) (assign ctx v) $ eval ctx e
                     Define F e -> loop ctx {f = e}
